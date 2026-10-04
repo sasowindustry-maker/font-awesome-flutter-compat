@@ -25,11 +25,11 @@ import 'package:font_awesome_flutter/src/icon_data.dart';
 class FaIcon extends Icon {
   /// The icon to display. The icon can be null, in which case the widget will
   /// render as an empty space of the specified [size].
-  final FaIconData? _icon;
+  final Object? _icon;
 
   /// Creates an icon.
   const FaIcon(
-    FaIconData? icon, {
+    Object? icon, {
     super.key,
     super.size,
     super.fill,
@@ -43,14 +43,24 @@ class FaIcon extends Icon {
     super.applyTextScaling,
     super.blendMode,
     super.fontWeight,
-  })  : _icon = icon,
-        // We pass null to the super constructor because Dart does not allow
-        // accessing properties of a parameter (icon.data) in a const 
-        // constructor initializer. We override the 'icon' getter below instead.
-        super(null);
+  }) : assert(
+         icon == null || icon is FaIconData || icon is IconData,
+         'FaIcon only accepts FaIconData, IconData, or null.',
+       ),
+       _icon = icon,
+       // We pass null to the super constructor because Dart does not allow
+       // accessing properties of a parameter (icon.data) in a const
+       // constructor initializer. We override the 'icon' getter below instead.
+       super(null);
 
   @override
-  IconData? get icon => _icon?.data;
+  IconData? get icon {
+    final Object? icon = _icon;
+    if (icon is FaIconData) {
+      return icon.data;
+    }
+    return icon as IconData?;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +89,7 @@ class FaIcon extends Icon {
 
     final List<Shadow>? iconShadows = shadows ?? iconTheme.shadows;
 
-    final IconData? icon = _icon?.data;
+    final IconData? icon = this.icon;
     if (icon == null) {
       return Semantics(
         label: semanticLabel,
